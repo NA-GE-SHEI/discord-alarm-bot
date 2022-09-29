@@ -9,3 +9,4 @@ Python 版本需求 3.8.0 以上
 ### /foodlist
 ### /task
 ### /tasklist
+### /set_alarm_channel
