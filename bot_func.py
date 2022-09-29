@@ -11,7 +11,7 @@ def bot_init(path):
 
 def clock():
     date = time.strftime('%#m-%#d', time.localtime())
-    now = time.strftime('%#H:%M', time.localtime())
+    now = time.strftime('%H:%M', time.localtime())
     return date, now
 
 
@@ -37,24 +37,39 @@ def rm_food(food_name):
     read_food()
     return food
 
-def task(MM, DD, HHMM, description, id, who, sucess = False):
+def task(MM, DD, HHMM, description, id, who, server_id, server, channel, sucess = False):
     for i in curson.execute("SELECT _index FROM alarm ORDER BY _index DESC limit 1"):
         index = int(i[0]) + 1 if len(i) >= 1 else i
-    curson.execute(f"INSERT INTO alarm VALUES('{index}', '{sucess}', '{MM}', '{DD}','{HHMM}','{description}','{id}', '{who}')")
+    curson.execute(f"INSERT INTO alarm VALUES('{index}', '{sucess}', '{MM}', '{DD}','{HHMM}','{description}','{id}', '{who}', '{server_id}', '{server}', '{channel}')")
     conn.commit()
 
-def tasklist():
+def tasklist(server_id):
     msg = ''
     i = 0
-    for index, success, MM, DD, HHMM , description, id, who in curson.execute("SELECT * FROM alarm"):
-        if success == "False":
+    for index, success, MM, DD, HHMM , description, id, who, _server_id, server, channel in curson.execute("SELECT * FROM alarm"):
+        if success == "False" and server_id == _server_id:
             i += 1
             msg = msg + f"{i}. {MM}/{DD}, {HHMM}, {description}, {who}\n"
+    if msg.replace(" ", '') == '':
+        msg = "目前無任務"
     return msg
+
+def where(server_id):
+    for _server, _server_id, d4 in curson.execute(f"SELECT * FROM d4channel"):
+        if server_id == _server_id:
+            return d4
+
+def set_channel(server, server_id, channel_id):
+    for _server, _server_id, d4 in curson.execute(f"SELECT * FROM d4channel"):
+        if server_id == _server_id:
+            curson.execute(f"UPDATE d4channel set d4 = '{channel_id}' WHERE server_id = {server_id}")
+        else:
+            curson.execute(f"INSERT INTO d4channel VALUES('{server}', '{server_id}', '{channel_id}')")
+        conn.commit()            
 
 async def check_task():
     while True:
-        for index, check, month, day, _time, description, id, who in curson.execute(f"SELECT * FROM alarm"):
+        for index, check, month, day, _time, description, id, who, server_id, server, channel in curson.execute(f"SELECT * FROM alarm"):
             # print(index, check, month, day, _time, description, id)              #檢查點1
             if check == "False":
                 data, now = clock()
@@ -64,5 +79,8 @@ async def check_task():
                         # print(description, id)                                   #檢查點3
                         curson.execute(f"UPDATE alarm set success = 'True' WHERE _index = {index}")
                         conn.commit()
-                        return description, id
+                        _where = where(server_id)
+                        if _where != channel and _where != None:
+                            channel = _where
+                        return description, id, channel
         await asyncio.sleep(1)
