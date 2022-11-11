@@ -1,4 +1,4 @@
-import sqlite3, time, asyncio
+import sqlite3, time, asyncio, datetime
 
 food = []
 DB_path = r".\discord_bot.db"
@@ -10,9 +10,12 @@ def bot_init(path):
     DB_path = path
 
 def clock():
-    date = time.strftime('%#m-%#d', time.localtime())
-    now = time.strftime('%H:%M', time.localtime())
-    return date, now
+    class Date:
+        month = time.strftime('%#m', time.localtime())
+        day = time.strftime('%#d', time.localtime())
+        hour = time.strftime('%H', time.localtime())
+        minute = time.strftime('%M', time.localtime())
+    return Date
 
 
 def read_food():
@@ -72,10 +75,12 @@ async def check_task():
         for index, check, month, day, _time, description, id, who, server_id, server, channel in curson.execute(f"SELECT * FROM alarm"):
             # print(index, check, month, day, _time, description, id)              #檢查點1
             if check == "False":
-                data, now = clock()
-                if data == f"{month}-{day}":
-                    # print(data, f"{month}-{day}")                                 #檢查點2
-                    if now == _time:
+            # print(data, f"{month}-{day}")                                 #檢查點2
+                try:
+                    date = clock()
+                    now_time = datetime.datetime(2022, int(date.month), int(date.day), int(date.hour), int(date.minute))
+                    alarm_time = datetime.datetime(2022, int(month), int(day), int(_time.split(":")[0]), int(_time.split(":")[1]))
+                    if now_time > alarm_time or now_time == alarm_time:
                         # print(description, id)                                   #檢查點3
                         curson.execute(f"UPDATE alarm set success = 'True' WHERE _index = {index}")
                         conn.commit()
@@ -83,4 +88,6 @@ async def check_task():
                         if _where != channel and _where != None:
                             channel = _where
                         return description, id, channel
+                except:
+                    print("時間錯誤")
         await asyncio.sleep(1)

@@ -7,5 +7,5 @@ Python 版本需求 3.8.0 以上
 ### /addfood
 ### /rmfood
 ### /foodlist
-### /task
-### /tasklist
+### /alarm
+### /alarmlist
