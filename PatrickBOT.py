@@ -157,17 +157,6 @@ async def self(interaction: discord.Integration, echo:str):
         logging.error(f"來自 '{interaction.user}' 失敗 '說'")
         logging.error(e)
 
-@tree.command(name = "hehe", description = "派大星嘿嘿" )
-async def self(interaction: discord.Integration):
-    hehe_path = r"./picture/patrick_hehe.png"
-    with open(hehe_path, "rb") as f:
-        pic = discord.File(f)
-        await interaction.response.send_message(file=pic)
-        # a = await interaction.pong()
-        # print(a)
-        # msg = await interaction.original_response()
-        # print(msg)
-
 @tree.command(name = "請問", description = "就打你想問的" )
 async def self(interaction: discord.Integration, content:str):
     print("Content:", content)
