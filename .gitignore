@@ -1,3 +1,16 @@
 # Pyc不進版控
-
 __pycache__/
+*.pyc
+
+# DB第一版預設後不再更新
+*.db
+
+# 本地測試檔案
+localtest/
+
+#.env
+.env
+
+# 其他
+*.log
+nohup.out
