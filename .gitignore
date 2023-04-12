@@ -3,11 +3,10 @@ __pycache__/
 *.pyc
 
 # DB第一版預設後不再更新
-discord_bot.db
-*.db
+# *.db
 
 #本地測試檔案
 localtest/
 
 #.env
-# .env
+.env
