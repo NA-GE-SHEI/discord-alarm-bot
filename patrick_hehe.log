@@ -1,0 +1,2 @@
+2023-04-12 06:27:21,255[DEBUG]__init__: Using selector: EpollSelector
+2023-04-12 06:27:21,256[INFO]login: logging in using static token

@@ -8,3 +8,6 @@ discord_bot.db
 
 #本地測試檔案
 localtest/
+
+#.env
+# .env
