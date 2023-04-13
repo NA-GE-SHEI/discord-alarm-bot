@@ -33,7 +33,8 @@ class aclinet(discord.Client):
             content, who, where = await BotFunc.check_task()
             channel = client.get_channel(where)
             try:
-                await channel.send(f'{who} {content} ')
+                await channel.send(f'{who}')
+                await channel.send(f'{content}')
                 logging.info(f"Successfuly alarm task, from {who}")
             except Exception as e:
                 logging.error(f"任務失敗, 來自 '{where}' 頻道\n請確認機器人權限")
