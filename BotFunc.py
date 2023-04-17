@@ -43,16 +43,17 @@ def rm_food(food_name):
     read_food()
     return food
 
-def task(MM, DD, HHMM, description, id, who, server_id, server, channel, sucess = False):
+def task(MM, DD, HHMM, description, id, name, server_id, server, channel, who, sucess = False):
     for i in cursor.execute("SELECT _index FROM alarm ORDER BY _index DESC limit 1"):
         index = int(i[0]) + 1 if len(i) >= 1 else i
-    cursor.execute(f"INSERT INTO alarm VALUES('{index}', '{sucess}', '{MM}', '{DD}','{HHMM}','{description}','{id}', '{who}', '{server_id}', '{server}', '{channel}')")
+    cursor.execute(f"INSERT INTO alarm VALUES('{index}', '{sucess}', '{MM}', '{DD}','{HHMM}','{description}','{id}', '{name}', '{server_id}', '{server}', '{channel}', '{who}')")
     conn.commit()
+    return index
 
 def tasklist(server_id):
     msg = ""
     i = 0
-    query = """SELECT _index, success, MM, DD, HHMM, description, id, who, server_id, server, channel
+    query = """SELECT _index, success, MM, DD, HHMM, description, id, name, server_id, server, channel, who
                FROM alarm WHERE success=? AND server_id=? ORDER BY MM, DD ASC"""
     for alarm in cursor.execute(query, ("False", server_id)):
         i += 1
@@ -85,8 +86,8 @@ def rmalarm(index, id):
                 resultMsg = "已經執行過的任務讓我留個紀錄好嗎?"
             else:
                 message = f"{result[2]}/{result[3]}, {result[4]}, {result[5]}, {result[7]} (#{result[0]})"
-                query = "DELETE FROM alarm WHERE _index = ?"
-                result = cursor.execute(query, (index,)).fetchone()
+                query = "UPDATE alarm SET success = ? WHERE _index = ?"
+                result = cursor.execute(query, ("Cancel", index,)).fetchone()
                 conn.commit()
                 resultMsg = f"已刪除 {message}"
         else:
@@ -97,7 +98,7 @@ def rmalarm(index, id):
 
 
 Alarm = namedtuple("Alarm", ["index", "check", "month", "day", "time", "description",
-                             "id", "who", "server_id", "server", "channel"])
+                             "id", "name", "server_id", "server", "channel", "who"])
 
 async def check_task():
     nowYear = datetime.now().year
@@ -115,7 +116,7 @@ async def check_task():
                         conn.commit()
                         _where = where(alarm.server_id)
                         channel = _where or alarm.channel
-                        return alarm.description, alarm.id, channel
+                        return alarm.description, alarm.id, channel, alarm.who
                 except ValueError:
                     print("時間錯誤")
         await asyncio.sleep(1)

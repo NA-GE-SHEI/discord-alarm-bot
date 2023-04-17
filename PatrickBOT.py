@@ -30,12 +30,15 @@ class aclinet(discord.Client):
             self.synced = True
             logging.info(f"We have logged in as {self.user}")
         while True:
-            content, who, where = await BotFunc.check_task()
+            content, name, where, who = await BotFunc.check_task()
             channel = client.get_channel(where)
             try:
-                await channel.send(f'{who}')
+                if who == "null":
+                    await channel.send(f'<@{name}>')
+                else:
+                    await channel.send(f'{who}來自<@{name}>的鬧鐘:')
                 await channel.send(f'{content}')
-                logging.info(f"Successfuly alarm task, from {who}")
+                logging.info(f"Successfuly alarm task, from {name}")
             except Exception as e:
                 logging.error(f"任務失敗, 來自 '{where}' 頻道\n請確認機器人權限")
                 logging.error(e)
@@ -47,7 +50,7 @@ tree = app_commands.CommandTree(client)
 @tree.command(name = "alarm", description = "鬧鐘(time格式為24小時制, HH:MM)")
 async def self(interaction: discord.Integration, mm:int, dd:int, time:str, desc:str, who:str = "default"):
     if who == "default":
-        who = f"<@{interaction.user.id}>"
+        who = f"null"
     class hourErr(BaseException):
         msg = "他媽你看過哪個小時會超過24的???"
     class minErr(BaseException):
@@ -63,9 +66,9 @@ async def self(interaction: discord.Integration, mm:int, dd:int, time:str, desc:
                 raise hourErr
             if int(time.split(":")[1]) >=60:
                 raise minErr
-            BotFunc.task(mm, dd, time, desc, who, interaction.user,
-                            interaction.guild.id, interaction.guild, interaction.guild.system_channel.id)
-            await interaction.response.send_message(f"鬧鐘已定在{mm}/{dd}, {time}, 內容: {desc}")
+            index = BotFunc.task(mm, dd, time, desc, interaction.user.id, interaction.user,
+                            interaction.guild.id, interaction.guild, interaction.guild.system_channel.id, who)
+            await interaction.response.send_message(f"鬧鐘已定在{mm}/{dd}, {time}, 內容: {desc}(#{index})")
             logging.info(f"來自'{interaction.user}'已成功設定鬧鐘")
         else:
             await interaction.response.send_message("time要打':'")
