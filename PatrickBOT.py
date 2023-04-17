@@ -34,9 +34,9 @@ class aclinet(discord.Client):
             channel = client.get_channel(where)
             try:
                 if who == "null":
-                    await channel.send(f'{who}來自{name}的鬧鐘:')
+                    await channel.send(f'<@{name}>')
                 else:
-                    await channel.send(f'{name}')
+                    await channel.send(f'{who}來自<@{name}>的鬧鐘:')
                 await channel.send(f'{content}')
                 logging.info(f"Successfuly alarm task, from {name}")
             except Exception as e:
